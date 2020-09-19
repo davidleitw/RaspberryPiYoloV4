@@ -1,11 +1,4 @@
-import torch 
-from torch.utils.data import DataLoader
-from torchvision import datasets, transforms
-from torch.autograd import Variable
-
-from .conf import Config
-
-from fastapi import FastAPI, WebSocket, APIRouter
+from fastapi import  WebSocket, APIRouter
 from fastapi.responses import HTMLResponse
 
 import numpy as np 
@@ -13,12 +6,6 @@ import cv2
 from yolov4.tf import YOLOv4
 
 router = APIRouter()
-config = Config()
-
-yolo = YOLOv4()
-yolo.classes = "coco.names"
-yolo.make_model()
-yolo.load_weights("yolov4.weights", weights_type="yolo")
 
 @router.get('/')
 async def hello():
@@ -27,6 +14,11 @@ async def hello():
 @router.websocket('/ws')
 async def websocket_connection(websocket: WebSocket):
     await websocket.accept()
+    yolo = YOLOv4()
+    yolo.classes = 'coco.names'
+    yolo.make_model()
+    yolo.load_weights("yolov4.weights", weights_type="yolo")
+    
     while True:
         _frame = await websocket.receive_bytes()
         nparray = np.frombuffer(_frame, np.uint8)
@@ -41,3 +33,4 @@ async def websocket_connection(websocket: WebSocket):
             break
 
     cv2.destroyAllWindows()
+

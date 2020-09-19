@@ -19,8 +19,8 @@ class Config(object):
         except ValueError:
             self.expire_minutes = 45
         self.yolo_cfg = {}
-        self.yolo_cfg['weights'] = './yolov4.weights'
-        self.yolo_cfg['coconame'] = './coco.names'
+        self.yolo_cfg['weights'] = 'config/yolov4.weights'
+        self.yolo_cfg['coconame'] = 'config/coco.names'
 
     def get_clientID(self)->str:
         return self.client_id
