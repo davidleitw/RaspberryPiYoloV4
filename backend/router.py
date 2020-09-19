@@ -1,9 +1,17 @@
-from fastapi import Depends, FastAPI
+from fastapi import FastAPI
+from fastapi import Depends, FastAPI, Request
 from fastapi.security import OAuth2PasswordBearer
 from starlette.middleware.sessions import SessionMiddleware
-from config import Config
+import detect as detect
 
 
-if __name__ == '__main__':
-    c = Config()
-    app = FastAPI()
+app = FastAPI()
+
+@app.get('/')
+async def Hello():
+    detect.detect()
+    return {"Message": "Hello World"}
+
+# import uvicorn
+# if name == "main":
+#    uvicorn.run(app,host="10.1.1.12",port=3000)

@@ -1,1 +1,7 @@
 .env
+
+install.sh
+
+*.cfg
+*.weights
+*.pyc
