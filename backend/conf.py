@@ -19,10 +19,8 @@ class Config(object):
         except ValueError:
             self.expire_minutes = 45
         self.yolo_cfg = {}
-        self.yolo_cfg['model_def'] = "yolo/config/yolov3.cfg"
-        self.yolo_cfg['img_size'] = 600
-        self.yolo_cfg['weight_path'] = 'yolo/config/yolov3.weights'
-        self.yolo_cfg['class_path'] = 'yolo/config/coco.names'
+        self.yolo_cfg['weights'] = './yolov4.weights'
+        self.yolo_cfg['coconame'] = './coco.names'
 
     def get_clientID(self)->str:
         return self.client_id
@@ -32,6 +30,3 @@ class Config(object):
         return self.expire_minutes
     def get_yolocfg(self, key:str):
         return self.yolo_cfg.get(key, "Not found")
-
-class Control(object):
-    pass

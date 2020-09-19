@@ -1,61 +1,43 @@
-from operator import mod
-
 import torch 
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 from torch.autograd import Variable
 
-from yolo.models import Darknet
-from yolo.utils.utils import * 
-from yolo.utils.datasets import *
-from conf import Config
+from .conf import Config
 
-from fastapi import FastAPI, WebSocket
+from fastapi import FastAPI, WebSocket, APIRouter
 from fastapi.responses import HTMLResponse
 
 import numpy as np 
 import cv2
-from PIL import Image
+from yolov4.tf import YOLOv4
 
-
-# config obj
+router = APIRouter()
 config = Config()
 
-# define device
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+yolo = YOLOv4()
+yolo.classes = "coco.names"
+yolo.make_model()
+yolo.load_weights("yolov4.weights", weights_type="yolo")
 
-# set up model
-model = Darknet(config.get_yolocfg('model_def'), img_size=config.get_yolocfg('img_size')).to(device)
-model.load_darknet_weights(config.get_yolocfg('weight_path'))
-model.eval()
+@router.get('/')
+async def hello():
+    return {"msg": "Hello world"}
 
-classes = load_classes(config.get_yolocfg('class_path'))
-Tensor = torch.cuda.FloatTensor if torch.cuda.is_available() else torch.FloatTensor
-
-loader = transforms.Compose(
-    [
-        transforms.Resize(416),
-        transforms.ToTensor(),
-    ]
-)
-
+@router.websocket('/ws')
 async def websocket_connection(websocket: WebSocket):
     await websocket.accept()
     while True:
-        frame = await websocket.receive_bytes()
-        nparray = np.frombuffer(frame, np.uint8)
-        source_image = image
+        _frame = await websocket.receive_bytes()
+        nparray = np.frombuffer(_frame, np.uint8)
         image = cv2.imdecode(nparray, cv2.IMREAD_UNCHANGED)
-        source_image = image
-
-        image = loader(image).float()
-        image = Variable(image, require_grad=True)
-
-        with torch.no_grad():
-            detections = model(image)
-            detections = non_max_suppression(detections, 0.8, 0.4)
-
-        print(type(detections))
-        print(source_image)            
+          
+        data = yolo.predict(frame=image)
+        result = yolo.draw_bboxes(image, data)
+        cv2.imshow('frame', result)
         await websocket.send_text("keep connection")
 
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    cv2.destroyAllWindows()

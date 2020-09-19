@@ -1,23 +1,16 @@
 from yolov4.tf import YOLOv4
 import cv2
+from fastapi import FastAPI
+from backend.detect import router
 
-yolo = YOLOv4()
+app = FastAPI()
+app.include_router(router)
 
-yolo.classes = "backend/yolo/config/coco.names"
+# yolo = YOLOv4()
 
-yolo.make_model()
-yolo.load_weights("yolov4.weights", weights_type="yolo")
+# yolo.classes = "backend/coco.names"
 
-yolo.inference(media_path="dog.jpg")
+# yolo.make_model()
+# yolo.load_weights("backend/yolov4.weights", weights_type="yolo")
 
-# frame = cv2.imread("dog.jpg")
-# frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
-# bboxes = predict(
-#                 frame,
-#                 iou_threshold=0.3,
-#                 score_threshold=0.25,
-#             )
-
-# frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-# image = draw_bboxes(frame, bboxes)
+# yolo.inference(media_path="dog.jpg")
