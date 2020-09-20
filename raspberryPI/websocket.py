@@ -4,6 +4,7 @@ import numpy
 import time
 import cv2
 import aiohttp
+
 fps = ""
 detectfps = ""
 framecount = 0
@@ -12,7 +13,8 @@ time1 = 0
 time2 = 0
 
 async def hello():
-    uri = "ws://127.0.0.1:8000/ws"
+    uri = "http://127.0.0.1:8000/ws"
+    #uri = "ws://127.0.0.1:8000/ws"
     async with aiohttp.ClientSession() as session:
 
         async with session.ws_connect(uri) as ws:
@@ -24,7 +26,7 @@ async def hello():
             global time1
             global time2
 
-            cap = cv2.VideoCapture(0)
+            cap = cv2.VideoCapture(-1)
             cap.set(cv2.CAP_PROP_FPS, 150)
             cap.set(3, 640)
             cap.set(4, 480)
