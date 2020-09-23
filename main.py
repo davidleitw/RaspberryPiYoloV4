@@ -1,8 +1,5 @@
 from fastapi import FastAPI
 from backend.detect import router
-from yolov4.tf import YOLOv4
-import uvicorn
-import cv2
 
 app = FastAPI()
 app.include_router(router)

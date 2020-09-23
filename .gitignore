@@ -1,7 +1,7 @@
 .env
 
-install.sh
-
 *.cfg
 *.weights
 *.pyc
+
+main.sh

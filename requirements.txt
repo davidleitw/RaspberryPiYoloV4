@@ -1,0 +1,12 @@
+pydantic==1.6.1
+uvicorn==0.11.8
+opencv_contrib_python==4.1.0.25
+Authlib==0.14.3
+websockets==8.1
+yolov4==1.2.1
+requests==2.18.4
+aiohttp==3.6.2
+starlette==0.13.8
+numpy==1.13.3
+fastapi==0.61.1
+python-dotenv==0.14.0

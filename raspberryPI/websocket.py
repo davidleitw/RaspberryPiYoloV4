@@ -1,6 +1,4 @@
 import asyncio
-import websockets
-import numpy
 import time
 import cv2
 import aiohttp
