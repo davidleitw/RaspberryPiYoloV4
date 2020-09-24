@@ -2,7 +2,7 @@ import cv2
 import numpy as np 
 
 from .detect import Yolo
-from fastapi import  WebSocket, APIRouter, WebSocketDisconnect
+from fastapi import  WebSocket, APIRouter, WebSocketDisconnect, Request
 from fastapi.responses import HTMLResponse
 
 socket_group = APIRouter()
@@ -23,12 +23,9 @@ html = """
         </ul>
         <script>
             var ws = new WebSocket("ws://10.1.1.12:3000/ws");
-            ws.onmessage = function(event) {
-                var messages = document.getElementById('messages')
-                var message = document.createElement('li')
-                var content = document.createTextNode(event.data)
-                message.appendChild(content)
-                messages.appendChild(message)
+            console.log(ws)
+            ws.onmessage = function(frame) {
+                console.log(frame.data)
             };
             function sendMessage(event) {
                 var input = document.getElementById("messageText")
@@ -40,6 +37,10 @@ html = """
     </body>
 </html>
 """
+
+class user(object):
+    def __init__(self):
+        user_id = 13
 
 class websocketManager(object):
     def __init__(self):
@@ -82,8 +83,12 @@ async def websocket_connection(websocket: WebSocket, user: str):
         manager.user_connect(websocket)
         try: 
             while manager.raspberry_connection:
-                manager.send_successful_msg()
-        except:
+                successfully_msg = await websocket.receive_str()
+            else: # raspberrypi 斷線
+                manager.user_disconnect(websocket)
+
+        # manager.raspberry_connection is False, 代表目前raspberry沒有建立影像
+        except WebSocketDisconnect:
             manager.user_disconnect(websocket)
 
     elif user == 'raspberry':
@@ -96,9 +101,8 @@ async def websocket_connection(websocket: WebSocket, user: str):
                 boxes = Yolo.predict(frame=image) # input each frame to yolov4 model. 
                 result_image = Yolo.draw_bboxes(image, boxes)
 
+                # 廣播給所有跟backend連結的frontend
                 manager.send_frame_broadcast(cv2.imencode(('.jpg', result_image)[1].tobytes()))
         
         except WebSocketDisconnect:
             manager.raspberry_disconnect()
-
-            

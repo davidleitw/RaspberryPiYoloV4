@@ -1,6 +1,7 @@
 from fastapi import  WebSocket, APIRouter, UploadFile, File, status
 from fastapi.responses import JSONResponse, HTMLResponse
 
+import time
 import numpy as np 
 import cv2
 from yolov4.tf import YOLOv4
@@ -19,15 +20,12 @@ async def yolov4_from_singleImage(files: UploadFile = File(...)):
         image = np.fromstring(file, np.uint8)
         image = cv2.imdecode(image, cv2.IMREAD_UNCHANGED)
 
+        start = time.time()
         boxes = Yolo.predict(frame=image)
-        print(
-            "filename = ", files.filename, "\n",
-            "boxes => ({}): {}\n".format(
-                boxes.shape,
-                boxes,
-            )
-        )
         result = Yolo.draw_bboxes(image, boxes)    
+        end = time.time()
+        
+        print('time for detecting and draw boxes: {}'.format(end-start))
         cv2.imwrite(files.filename, result)
         
         return JSONResponse(
@@ -36,6 +34,7 @@ async def yolov4_from_singleImage(files: UploadFile = File(...)):
                 "result_image_size": "({}, {})".format(str(result.shape[0]), str(result.shape[1])),
                 "image_size": "({}, {})".format(str(image.shape[0]), str(image.shape[1])),
                 "image_name": files.filename,
+                "run_time": str(end-start),
             }
         )
     except Exception as error:
